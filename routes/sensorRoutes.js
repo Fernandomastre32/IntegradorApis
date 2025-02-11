@@ -1,44 +1,48 @@
 const express = require("express");
 const router = express.Router();
-const SensorData = require("../models/sensorData");
+const Componente = require("../models/components");
+const Sensor = require("../models/sensor");
 
-// Ruta para obtener los últimos 10 registros históricos
-router.get("/historial", async (req, res) => {
+// Obtener todos los componentes de un sensor
+router.get("/:sensorId", async (req, res) => {
   try {
-    const data = await SensorData.find().sort({ fecha: -1 }).limit(10);
-    res.json(data);
+    const { sensorId } = req.params;
+    const componentes = await Componente.find({ sensorId });
+
+    res.status(200).json(componentes);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ mensaje: "Error al obtener componentes", error });
   }
 });
 
-// Ruta para obtener el último estado del sensor
-router.get("/", async (req, res) => {
+// Obtener un componente específico por nombre
+router.get("/:sensorId/:nombre", async (req, res) => {
   try {
-    const sensor = await SensorData.findOne({ _id: "unico" });
-    res.status(200).json(sensor);
+    const { sensorId, nombre } = req.params;
+    const componente = await Componente.findOne({ sensorId, nombre });
+
+    if (!componente) {
+      return res.status(404).json({ mensaje: "Componente no encontrado" });
+    }
+
+    res.status(200).json(componente);
   } catch (error) {
-    res.status(500).json({ mensaje: "Error al obtener datos", error });
+    res.status(500).json({ mensaje: "Error al obtener el componente", error });
   }
 });
 
-// Ruta para guardar datos (historial) y actualizar el estado actual
+// Crear o actualizar un componente
 router.post("/", async (req, res) => {
   try {
-    const { temperatura, luz } = req.body;
+    const { sensorId, nombre, estado } = req.body;
 
-    // Guarda en historial
-    const newSensorData = new SensorData({ temperatura, luz });
-    await newSensorData.save();
-
-    // Actualiza el estado actual (mantiene solo un documento)
-    const updatedSensor = await SensorData.findOneAndUpdate(
-      { _id: "unico" },
-      { temperatura, luz, fecha: new Date() },
+    let componente = await Componente.findOneAndUpdate(
+      { sensorId, nombre },
+      { estado, timestamp: new Date() },
       { new: true, upsert: true }
     );
 
-    res.status(201).json({ historial: newSensorData, actual: updatedSensor });
+    res.status(201).json(componente);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

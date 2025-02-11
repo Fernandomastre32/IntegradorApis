@@ -1,19 +1,21 @@
-require('dotenv').config(); // Carga las variables del archivo .env
-const express = require('express');
-const mongoose = require('./config/db'); // Configuración de MongoDB
-const cors = require('cors');
+require("dotenv").config();
+const express = require("express");
+const mongoose = require("./config/db");
+const cors = require("cors");
 
-const sensorRoutes = require('./routes/sensorRoutes'); // Importa las rutas
+const sensorRoutes = require("./routes/sensorRoutes");
+const componenteRoutes = require("./routes/componenteRoutes");
 
 const app = express();
-const PORT = process.env.PORT || 3000; // Usa el puerto definido en .env o 3000 por defecto
+const PORT = process.env.PORT || 3000;
 
 // Middlewares
-app.use(express.json()); // Parseo de JSON en las peticiones
-app.use(cors()); // Permitir peticiones desde otros orígenes
+app.use(express.json());
+app.use(cors());
 
 // Rutas
-app.use('/api/sensors', sensorRoutes); // Rutas base para sensores
+app.use("/api/sensores", sensorRoutes);
+app.use("/api/componentes", componenteRoutes);
 
 // Inicia el servidor
 app.listen(PORT, () => {
