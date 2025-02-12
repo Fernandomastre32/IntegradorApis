@@ -1,48 +1,68 @@
 const express = require("express");
 const router = express.Router();
-const Componente = require("../models/components");
-const Sensor = require("../models/sensor");
+const Sensor = require("../models/sensor.model");
+const SensorData = require("../models/sensorData.model");
 
-// Obtener todos los componentes de un sensor
-router.get("/:sensorId", async (req, res) => {
+// Obtener todos los sensores
+router.get("/", async (req, res) => {
   try {
-    const { sensorId } = req.params;
-    const componentes = await Componente.find({ sensorId });
-
-    res.status(200).json(componentes);
+    const sensores = await Sensor.find();
+    res.status(200).json(sensores);
   } catch (error) {
-    res.status(500).json({ mensaje: "Error al obtener componentes", error });
+    res.status(500).json({ mensaje: "Error al obtener sensores", error });
   }
 });
 
-// Obtener un componente específico por nombre
-router.get("/:sensorId/:nombre", async (req, res) => {
+// Obtener sensor por nombre
+router.get("/:nombre", async (req, res) => {
   try {
-    const { sensorId, nombre } = req.params;
-    const componente = await Componente.findOne({ sensorId, nombre });
+    const { nombre } = req.params;
+    const sensor = await Sensor.findOne({ nombre });
 
-    if (!componente) {
-      return res.status(404).json({ mensaje: "Componente no encontrado" });
-    }
+    if (!sensor) return res.status(404).json({ mensaje: "Sensor no encontrado" });
 
-    res.status(200).json(componente);
+    res.status(200).json(sensor);
   } catch (error) {
-    res.status(500).json({ mensaje: "Error al obtener el componente", error });
+    res.status(500).json({ mensaje: "Error al obtener sensor", error });
   }
 });
 
-// Crear o actualizar un componente
-router.post("/", async (req, res) => {
+// Actualizar datos del sensor sin cambiar nombre
+router.put("/:nombre", async (req, res) => {
   try {
-    const { sensorId, nombre, estado } = req.body;
+    const { nombre } = req.params;
+    const { temperatura, nivel_humo, alarma_activada } = req.body;
 
-    let componente = await Componente.findOneAndUpdate(
-      { sensorId, nombre },
-      { estado, timestamp: new Date() },
-      { new: true, upsert: true }
+    let sensor = await Sensor.findOneAndUpdate(
+      { nombre },
+      { temperatura, nivel_humo, alarma_activada, timestamp: new Date() },
+      { new: true }
     );
 
-    res.status(201).json(componente);
+    if (!sensor) return res.status(404).json({ mensaje: "Sensor no encontrado" });
+
+    // Guardar en historial
+    const newData = new SensorData({ sensorId: sensor._id, temperatura, nivel_humo, alarma_activada });
+    await newData.save();
+
+    res.status(200).json(sensor);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Crear nuevo sensor
+router.post("/", async (req, res) => {
+  try {
+    const { nombre, temperatura, nivel_humo, alarma_activada } = req.body;
+
+    let sensor = await Sensor.findOne({ nombre });
+    if (sensor) return res.status(400).json({ mensaje: "El sensor ya existe" });
+
+    sensor = new Sensor({ nombre, temperatura, nivel_humo, alarma_activada });
+    await sensor.save();
+
+    res.status(201).json(sensor);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
