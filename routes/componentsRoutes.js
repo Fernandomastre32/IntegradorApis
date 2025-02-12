@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Componente = require("../models/componente.model");
+const Componente = require("../models/components");
 
 // Actualizar estado del componente sin cambiar su nombre
 router.put("/:sensorId/:nombre", async (req, res) => {

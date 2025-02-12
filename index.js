@@ -1,8 +1,8 @@
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
-const sensoresRoutes = require("./routes/sensores.routes");
-const componentesRoutes = require("./routes/componentes.routes");
+const sensorRoutes = require("./routes/sensorRoutes"); 
+const componentesRoutes = require("./routes/componentsRoutes");
 
 const app = express();
 app.use(express.json());
@@ -16,7 +16,7 @@ mongoose.connect(process.env.MONGO_URI, {
 .catch(error => console.log("❌ Error al conectar MongoDB", error));
 
 // Rutas
-app.use("/api/sensores", sensoresRoutes);
+app.use("/api/sensores", sensorRoutes);
 app.use("/api/componentes", componentesRoutes);
 
 // Servidor en puerto 5000
