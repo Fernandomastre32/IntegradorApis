@@ -3,7 +3,38 @@ const router = express.Router();
 const Sensor = require("../models/sensor");
 const SensorData = require("../models/sensorData");
 
-// Obtener todos los sensores
+/**
+ * @swagger
+ * tags:
+ *   - name: Sensores
+ *     description: Rutas para gestionar sensores
+ */
+
+/**
+ * @swagger
+ * /api/sensores:
+ *   get:
+ *     summary: Obtener todos los sensores
+ *     tags: [Sensores]
+ *     responses:
+ *       200:
+ *         description: Lista de sensores
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   nombre:
+ *                     type: string
+ *                   temperatura:
+ *                     type: number
+ *                   nivel_humo:
+ *                     type: number
+ *                   alarma_activada:
+ *                     type: boolean
+ */
 router.get("/", async (req, res) => {
   try {
     const sensores = await Sensor.find();
@@ -13,7 +44,40 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Obtener sensor por nombre
+/**
+ * @swagger
+ * /api/sensores/{nombre}:
+ *   get:
+ *     summary: Obtener sensor por nombre
+ *     tags: [Sensores]
+ *     parameters:
+ *       - name: nombre
+ *         in: path
+ *         required: true
+ *         description: Nombre del sensor que se desea obtener
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Sensor encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 nombre:
+ *                   type: string
+ *                 temperatura:
+ *                   type: number
+ *                 nivel_humo:
+ *                   type: number
+ *                 alarma_activada:
+ *                   type: boolean
+ *       404:
+ *         description: Sensor no encontrado
+ *       500:
+ *         description: Error al obtener el sensor
+ */
 router.get("/:nombre", async (req, res) => {
   try {
     const { nombre } = req.params;
@@ -27,7 +91,40 @@ router.get("/:nombre", async (req, res) => {
   }
 });
 
-// Actualizar datos del sensor sin cambiar nombre
+/**
+ * @swagger
+ * /api/sensores/{nombre}:
+ *   put:
+ *     summary: Actualizar los datos de un sensor
+ *     tags: [Sensores]
+ *     parameters:
+ *       - name: nombre
+ *         in: path
+ *         required: true
+ *         description: Nombre del sensor a actualizar
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               temperatura:
+ *                 type: number
+ *               nivel_humo:
+ *                 type: number
+ *               alarma_activada:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Sensor actualizado exitosamente
+ *       404:
+ *         description: Sensor no encontrado
+ *       500:
+ *         description: Error al actualizar el sensor
+ */
 router.put("/:nombre", async (req, res) => {
   try {
     const { nombre } = req.params;
@@ -60,8 +157,35 @@ router.put("/:nombre", async (req, res) => {
   }
 });
 
-
-// Crear nuevo sensor
+/**
+ * @swagger
+ * /api/sensores:
+ *   post:
+ *     summary: Crear un nuevo sensor
+ *     tags: [Sensores]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nombre:
+ *                 type: string
+ *               temperatura:
+ *                 type: number
+ *               nivel_humo:
+ *                 type: number
+ *               alarma_activada:
+ *                 type: boolean
+ *     responses:
+ *       201:
+ *         description: Sensor creado exitosamente
+ *       400:
+ *         description: El sensor ya existe
+ *       500:
+ *         description: Error al crear el sensor
+ */
 router.post("/", async (req, res) => {
   try {
     const { nombre, temperatura, nivel_humo, alarma_activada } = req.body;
