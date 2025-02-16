@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Sensor = require("../models/Sensor");
+const Sensor = require("../models/sensor");
 const SensorData = require("../models/sensorData");
 
 // Obtener todos los sensores
