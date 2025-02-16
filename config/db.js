@@ -1,15 +1,12 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
 
-const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(process.env.MONGO_URI);
-    console.log(`MongoDB conectado: ${conn.connection.host}`);
-  } catch (error) {
-    console.error(`Error de conexión a MongoDB: ${error.message}`);
-    process.exit(1); // Detener el servidor si la conexión falla
-  }
-};
+const mongoUri = process.env.MONGO_URI;
 
-connectDB(); // Llama a la función al importar el archivo
-
-module.exports = mongoose;
+mongoose.connect(mongoUri, {
+  authSource: "mi_base_de_datos", // Asegura que se autentique en la base correcta
+  user: "admin",  // Usuario de MongoDB
+  pass: "adminpassword" // Contraseña de MongoDB
+})
+  .then(() => console.log('✅ Conectado a MongoDB'))
+  .catch(err => console.error('❌ Error al conectar a MongoDB:', err));
