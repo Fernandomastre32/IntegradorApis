@@ -5,6 +5,7 @@ const swaggerJSDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const sensorRoutes = require("./routes/sensorRoutes");
 const componentesRoutes = require("./routes/componentsRoutes");
+const historialRoutes = require("./routes/historialRoutes");
 
 const app = express();
 app.use(express.json());
@@ -41,6 +42,8 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // Rutas
 app.use("/api/sensores", sensorRoutes);
 app.use("/api/componentes", componentesRoutes);
+app.use("/api/historial", historialRoutes);
+
 
 // Servidor en puerto 5000
 const PORT = process.env.PORT || 5000;

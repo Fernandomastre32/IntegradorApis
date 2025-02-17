@@ -5,7 +5,7 @@ const SensorDataSchema = new mongoose.Schema({
   temperatura: Number,
   nivel_humo: Number,
   alarma_activada: Boolean,
-  fecha: { type: Date, default: Date.now } // Mantener el historial con timestamps precisos
+  fecha: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model("SensorData", SensorDataSchema);

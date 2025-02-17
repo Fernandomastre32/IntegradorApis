@@ -1,10 +1,12 @@
 const mongoose = require("mongoose");
-const SensorDataSchema = new mongoose.Schema({
-  sensorId: { type: mongoose.Schema.Types.ObjectId, ref: "Sensor", required: true },
+
+const SensorSchema = new mongoose.Schema({
+  nombre: { type: String, unique: true, required: true }, // Agregado el campo 'nombre'
   temperatura: Number,
   nivel_humo: Number,
+  estado: Boolean,
   alarma_activada: Boolean,
   fecha: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model("Sensor", SensorDataSchema);
+module.exports = mongoose.model("Sensor", SensorSchema);

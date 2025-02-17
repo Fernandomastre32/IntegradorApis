@@ -54,37 +54,19 @@ router.get("/", async (req, res) => {
  *       - name: nombre
  *         in: path
  *         required: true
- *         description: Nombre del sensor que se desea obtener
  *         schema:
  *           type: string
  *     responses:
  *       200:
  *         description: Sensor encontrado
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 nombre:
- *                   type: string
- *                 temperatura:
- *                   type: number
- *                 nivel_humo:
- *                   type: number
- *                 alarma_activada:
- *                   type: boolean
  *       404:
  *         description: Sensor no encontrado
- *       500:
- *         description: Error al obtener el sensor
  */
 router.get("/:nombre", async (req, res) => {
   try {
     const { nombre } = req.params;
     const sensor = await Sensor.findOne({ nombre });
-
     if (!sensor) return res.status(404).json({ mensaje: "Sensor no encontrado" });
-
     res.status(200).json(sensor);
   } catch (error) {
     res.status(500).json({ mensaje: "Error al obtener sensor", error });
@@ -93,75 +75,9 @@ router.get("/:nombre", async (req, res) => {
 
 /**
  * @swagger
- * /api/sensores/{nombre}:
- *   put:
- *     summary: Actualizar los datos de un sensor
- *     tags: [Sensores]
- *     parameters:
- *       - name: nombre
- *         in: path
- *         required: true
- *         description: Nombre del sensor a actualizar
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               temperatura:
- *                 type: number
- *               nivel_humo:
- *                 type: number
- *               alarma_activada:
- *                 type: boolean
- *     responses:
- *       200:
- *         description: Sensor actualizado exitosamente
- *       404:
- *         description: Sensor no encontrado
- *       500:
- *         description: Error al actualizar el sensor
- */
-router.put("/:nombre", async (req, res) => {
-  try {
-    const { nombre } = req.params;
-    const { temperatura, nivel_humo, alarma_activada } = req.body;
-
-    let sensor = await Sensor.findOne({ nombre });
-
-    if (!sensor) return res.status(404).json({ mensaje: "Sensor no encontrado" });
-
-    // Guardar el estado anterior en la tabla de historial antes de actualizar
-    const historial = new SensorData({
-      sensorId: sensor._id,
-      temperatura: sensor.temperatura,
-      nivel_humo: sensor.nivel_humo,
-      alarma_activada: sensor.alarma_activada,
-      fecha: new Date() // Registrar el momento del cambio
-    });
-    await historial.save();
-
-    // Actualizar el sensor con los nuevos valores
-    sensor.temperatura = temperatura;
-    sensor.nivel_humo = nivel_humo;
-    sensor.alarma_activada = alarma_activada;
-    sensor.fecha = new Date();
-    await sensor.save();
-
-    res.status(200).json(sensor);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-/**
- * @swagger
  * /api/sensores:
  *   post:
- *     summary: Crear un nuevo sensor
+ *     summary: Crear o actualizar un sensor
  *     tags: [Sensores]
  *     requestBody:
  *       required: true
@@ -179,26 +95,75 @@ router.put("/:nombre", async (req, res) => {
  *               alarma_activada:
  *                 type: boolean
  *     responses:
+ *       200:
+ *         description: Sensor actualizado exitosamente
  *       201:
  *         description: Sensor creado exitosamente
- *       400:
- *         description: El sensor ya existe
  *       500:
- *         description: Error al crear el sensor
+ *         description: Error en el servidor
  */
 router.post("/", async (req, res) => {
   try {
     const { nombre, temperatura, nivel_humo, alarma_activada } = req.body;
-
     let sensor = await Sensor.findOne({ nombre });
-    if (sensor) return res.status(400).json({ mensaje: "El sensor ya existe" });
-
+    if (sensor) {
+      const historial = new SensorData({
+        sensorId: sensor._id,
+        temperatura: sensor.temperatura,
+        nivel_humo: sensor.nivel_humo,
+        alarma_activada: sensor.alarma_activada,
+        fecha: new Date()
+      });
+      await historial.save();
+      sensor.temperatura = temperatura;
+      sensor.nivel_humo = nivel_humo;
+      sensor.alarma_activada = alarma_activada;
+      sensor.fecha = new Date();
+      await sensor.save();
+      return res.status(200).json(sensor);
+    }
     sensor = new Sensor({ nombre, temperatura, nivel_humo, alarma_activada });
     await sensor.save();
-
     res.status(201).json(sensor);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/historial:
+ *   get:
+ *     summary: Obtener historial de cambios de sensores
+ *     tags: [Sensores]
+ *     responses:
+ *       200:
+ *         description: Lista del historial
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   sensorId:
+ *                     type: string
+ *                   temperatura:
+ *                     type: number
+ *                   nivel_humo:
+ *                     type: number
+ *                   alarma_activada:
+ *                     type: boolean
+ *                   fecha:
+ *                     type: string
+ *                     format: date-time
+ */
+router.get("/historial", async (req, res) => {
+  try {
+    const historial = await SensorData.find().populate("sensorId");
+    res.status(200).json(historial);
+  } catch (error) {
+    res.status(500).json({ mensaje: "Error al obtener historial", error });
   }
 });
 
