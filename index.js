@@ -5,7 +5,8 @@ const swaggerJSDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const sensorRoutes = require("./routes/sensorRoutes");
 const componentesRoutes = require("./routes/componentsRoutes");
-const historialRoutes = require("./routes/historialRoutes");
+const historialRoutes = require("./routes/historialSensoresRoutes");
+const historialComponentesRoutes = require("./routes/historialComponentesRoutes");
 
 const app = express();
 app.use(express.json());
@@ -29,21 +30,22 @@ const swaggerOptions = {
     },
   },
   apis: [
-    "./routes/sensorRoutes.js", // Ruta a las rutas de sensores
-    "./routes/componentsRoutes.js", // Ruta a las rutas de componentes
+    "./routes/sensorRoutes.js",
+    "./routes/componentsRoutes.js",
+    "./routes/historialComponentesRoutes.js"
   ],
 };
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
 
-// Servir la documentación Swagger en el endpoint '/api-docs'
+// Servir la documentación Swagger en '/api-docs'
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Rutas
 app.use("/api/sensores", sensorRoutes);
 app.use("/api/componentes", componentesRoutes);
 app.use("/api/historial", historialRoutes);
-
+app.use("/api/componentes/historial", historialComponentesRoutes);
 
 // Servidor en puerto 5000
 const PORT = process.env.PORT || 5000;
