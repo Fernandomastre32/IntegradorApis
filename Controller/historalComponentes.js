@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const ComponentData = require("../models/componentData");
 
-router.get("/", async (req, res) => {
+router.get("/", async (_req, res) => {
     try {
         const historial = await ComponentData.find().populate("componenteId");
 
