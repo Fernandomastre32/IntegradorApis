@@ -1,7 +1,3 @@
-const express = require("express");
-const router = express.Router();
-const Componente = require("../models/components");
-const ComponentData = require("../models/componentData");
 /**
  * @swagger
  * tags:
@@ -37,14 +33,6 @@ const ComponentData = require("../models/componentData");
  *       500:
  *         description: Error en el servidor
  */
-router.get("/", async (req, res) => {
-  try {
-    const componentes = await Componente.find();
-    res.status(200).json(componentes);
-  } catch (error) {
-    res.status(500).json({ mensaje: "Error al obtener componentes", error });
-  }
-});
 
 /**
  * @swagger
@@ -80,16 +68,6 @@ router.get("/", async (req, res) => {
  *       500:
  *         description: Error en el servidor
  */
-router.get("/:nombre", async (req, res) => {
-  try {
-    const { nombre } = req.params;
-    const componente = await Componente.findOne({ nombre });
-    if (!componente) return res.status(404).json({ mensaje: "Componente no encontrado" });
-    res.status(200).json(componente);
-  } catch (error) {
-    res.status(500).json({ mensaje: "Error al obtener componente", error });
-  }
-});
 
 /**
  * @swagger
@@ -116,42 +94,6 @@ router.get("/:nombre", async (req, res) => {
  *       500:
  *         description: Error en el servidor
  */
-router.post("/", async (req, res) => {
-  try {
-    const { nombre, estado } = req.body;
-
-    let componente = await Componente.findOne({ nombre });
-
-    if (componente) {
-      // Guardar estado anterior en historial
-      const historial = new ComponentData({
-        componenteId: componente.sensorId,
-        estado: componente.estado,
-        fecha: new Date(),
-      });
-      await historial.save();
-
-      // Actualizar estado y fecha
-      componente.estado = estado === "true" || estado === true;
-      componente.timestamp = new Date();
-      await componente.save();
-
-      return res.status(200).json({ mensaje: "Componente actualizado", componente });
-    }
-
-    // Crear nuevo componente si no existe
-    componente = new Componente({
-      nombre,
-      estado: estado === "true" || estado === true,
-    });
-
-    await componente.save();
-    res.status(201).json({ mensaje: "Componente creado", componente });
-
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
 
 /**
  * @swagger
@@ -179,13 +121,3 @@ router.post("/", async (req, res) => {
  *       500:
  *         description: Error en el servidor
  */
-router.get("/historial", async (req, res) => {
-  try {
-    const historial = await ComponentData.find().populate("componenteId");
-    res.status(200).json(historial);
-  } catch (error) {
-    res.status(500).json({ mensaje: "Error al obtener historial", error });
-  }
-});
-
-module.exports = router;
