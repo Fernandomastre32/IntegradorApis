@@ -8,3 +8,5 @@ const ComponenteSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model("Componentes", ComponenteSchema);
+
+
