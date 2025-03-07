@@ -7,6 +7,7 @@ const sensorRoutes = require("./routes/sensorRoutes");
 const componentesRoutes = require("./routes/componentsRoutes");
 const historialRoutes = require("./routes/historialSensoresRoutes");
 const historialComponentesRoutes = require("./routes/historialComponentesRoutes");
+const configRoutes = require("./routes/configRoutes.JS");  // Corregido aquí
 
 const app = express();
 app.use(express.json());
@@ -16,8 +17,8 @@ mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
-.then(() => console.log("✅ Conectado a MongoDB"))
-.catch(error => console.log("❌ Error al conectar MongoDB", error));
+  .then(() => console.log("✅ Conectado a MongoDB"))
+  .catch(error => console.log("❌ Error al conectar MongoDB", error));
 
 // Configuración de Swagger
 const swaggerOptions = {
@@ -32,7 +33,8 @@ const swaggerOptions = {
   apis: [
     "./routes/sensorRoutes.js",
     "./routes/componentsRoutes.js",
-    "./routes/historialComponentesRoutes.js"
+    "./routes/historialComponentesRoutes.js",
+    "./routes/configRoutes.JS"
   ],
 };
 
@@ -46,6 +48,7 @@ app.use("/api/sensores", sensorRoutes);
 app.use("/api/componentes", componentesRoutes);
 app.use("/api/historial", historialRoutes);
 app.use("/api/componentes/historial", historialComponentesRoutes);
+app.use("/api/configuracion", configRoutes);  // Añadir ruta de configuración en la API
 
 // Servidor en puerto 5000
 const PORT = process.env.PORT || 5000;
